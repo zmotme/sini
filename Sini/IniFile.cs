@@ -185,10 +185,10 @@ namespace Sini
                 // open new section
                 if (config.AllowSections)
                 {
-                    if (line.StartsWith('['))
+                    if (line.StartsWith("["))
                     {
                         // make sure section ends with ]
-                        if (!line.EndsWith(']')) { throw new FormatException($"Invalid line {lineIndex} in ini file '{Path}': '{rawline}' does not have a closing bracket ] for section."); }
+                        if (!line.EndsWith("]")) { throw new FormatException($"Invalid line {lineIndex} in ini file '{Path}': '{rawline}' does not have a closing bracket ] for section."); }
 
                         // get section name and start feeding section
                         var sectionName = line.TrimStart('[').TrimEnd(']').Trim();
@@ -1006,10 +1006,25 @@ namespace Sini
                 else if (fieldType.IsEnum)
                 {
                     var asStr = ini.GetStr(section, key, null);
+#if NET6_0_OR_GREATER
+
                     if (asStr != null && !Enum.TryParse(fieldType, asStr, out value))
                     {
                         throw new FormatException($"Invalid value in ini file! Trying to read '[{section ?? string.Empty}].{key}' as enum of type '{fieldType.Name}', but value is '{asStr}'.");
                     }
+#else
+                    if (asStr != null)
+                    {
+                        try
+                        {
+                            value = Enum.Parse(fieldType, asStr, true);
+                        }
+                        catch (ArgumentException)
+                        {
+                            throw new FormatException($"Invalid value in ini file! Trying to read '[{section ?? string.Empty}].{key}' as enum of type '{fieldType.Name}', but value is '{asStr}'.");
+                        }
+                    }
+#endif
                 }
                 // boolean type? parse with all boolean options
                 else if (fieldType == typeof(bool))
@@ -1263,6 +1278,6 @@ namespace Sini
             SnakecaseKeysAndSections = 1 << 3,
         }
 
-        #endregion
+#endregion
     }
 }

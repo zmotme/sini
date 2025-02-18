@@ -7,6 +7,10 @@ SINI support comments and sections, and is highly configurable.
 
 ![example.png](example.png)
 
+# Fork difference
+
+I've added `net6.0` and `netstandard2.0` compatible
+
 # Install
 
 `Install-Package Sini`
