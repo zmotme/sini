@@ -4,6 +4,7 @@
 // Date: 10/2020
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Sini
 {
@@ -22,6 +23,14 @@ namespace Sini
         /// If false, will only allow whole-line comments.
         /// </summary>
         public bool AllowCommentsAfterValue;
+
+           /// <summary>
+        /// If true, remove wrappingquotes
+        /// </summary>
+        public bool TrimWrappingQuotes;
+
+        public char[] TrimQuotes;
+        public Regex TrimQuotesRegex;
 
         /// <summary>
         /// If true, will allow adding sections with square brackets.
@@ -82,9 +91,12 @@ namespace Sini
         {
             CommentCharacters = new char[] { '#', ';' };
             AllowCommentsAfterValue = true;
+            TrimWrappingQuotes = true;
+            TrimQuotes = new char[] { '"', '\'' };
+            TrimQuotesRegex = new Regex(@"(['""])(.*?)(\1)", RegexOptions.Compiled);
             AllowSections = true;
             Delimiter = '=';
-            KeyValidationRegex = @"^[a-zA-Z_\.0-9]+$";
+            KeyValidationRegex = @"^[a-zA-Z_\-\.0-9]+$";
             BoolPositiveValues = new HashSet<string>(new string[] { "1", "true", "yes", "on" });
             BoolNegativeValues = new HashSet<string>(new string[] { "0", "false", "no", "off" });
             LowercaseBoolValues = true;

@@ -173,14 +173,25 @@ namespace Sini
                     continue;
                 }
 
-                // remove in-line comments
-                if (config.AllowCommentsAfterValue)
-                {
-                    foreach (var commentChar in commentsCharacters)
-                    {
-                        line = line.Split(commentChar)[0].Trim();
-                    }
-                }
+                //// remove in-line comments
+                //// we need improve this
+                //// in section we don't need trim - sepereate trim function exists.
+                //// if key = value # comment, we need to remove the comment after space
+ 
+                //if (config.AllowCommentsAfterValue)
+                //{
+                //    if (line.StartsWith("["))
+                //    {
+                //        // do nothing
+                //    }
+                //    else
+                //    {
+                //        foreach (var commentChar in commentsCharacters)
+                //        {
+                //            line = line.Split(commentChar)[0].Trim();
+                //        }
+                //    }
+                //}
 
                 // open new section
                 if (config.AllowSections)
@@ -224,6 +235,30 @@ namespace Sini
                 // break into key and value
                 var key = line.Substring(0, equalIndex).Trim();
                 var value = line.Substring(equalIndex + 1).Trim();
+
+                if (config.AllowCommentsAfterValue)
+                {
+                    if (value.StartsWith("\"") || value.StartsWith("'"))
+                    {
+                        Match m = config.TrimQuotesRegex.Match(value);
+                        if (m.Success) { 
+                            value = m.Groups[2].Value;
+                        }
+                    }
+                    else
+                    {
+                        // remove in-line comments
+                        foreach (var commentChar in commentsCharacters)
+                        {
+                            value = value.Split(commentChar)[0].Trim();
+                        }
+                    }
+                }
+
+                if (config.TrimWrappingQuotes)
+                {
+                    value = value.Trim(config.TrimQuotes);
+                } 
                 lastKey = key;
 
                 // validate key
