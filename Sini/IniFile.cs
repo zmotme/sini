@@ -133,11 +133,11 @@ namespace Sini
 
                 // skip empty and comment lines
                 if (string.IsNullOrEmpty(line) || isComment)
-                { 
+                {
                     // if part of multiline value throw exception
-                    if (continueMultiline) 
-                    { 
-                        throw new FormatException($"Invalid line {lineIndex} in ini file '{Path}': Cannot have empty line or comment after multiline value (previous line ended with '{config.MultilineContinuation}' which means value should continue to this line)."); 
+                    if (continueMultiline)
+                    {
+                        throw new FormatException($"Invalid line {lineIndex} in ini file '{Path}': Cannot have empty line or comment after multiline value (previous line ended with '{config.MultilineContinuation}' which means value should continue to this line).");
                     }
 
                     // if comment, add to current comments list
@@ -161,7 +161,7 @@ namespace Sini
                     // get value and check if should continue to another line
                     var lineVal = rawline.Trim();
                     continueMultiline = lineVal.EndsWith(config.MultilineContinuation);
-                    
+
                     // remove multiline trailing character
                     if (continueMultiline)
                     {
@@ -177,7 +177,7 @@ namespace Sini
                 //// we need improve this
                 //// in section we don't need trim - sepereate trim function exists.
                 //// if key = value # comment, we need to remove the comment after space
- 
+
                 //if (config.AllowCommentsAfterValue)
                 //{
                 //    if (line.StartsWith("["))
@@ -236,29 +236,31 @@ namespace Sini
                 var key = line.Substring(0, equalIndex).Trim();
                 var value = line.Substring(equalIndex + 1).Trim();
 
-                if (config.AllowCommentsAfterValue)
+
+                if (value.StartsWith("\"") || value.StartsWith("'"))
                 {
-                    if (value.StartsWith("\"") || value.StartsWith("'"))
+                    Match m = config.TrimQuotesRegex.Match(value);
+                    if (m.Success)
                     {
-                        Match m = config.TrimQuotesRegex.Match(value);
-                        if (m.Success) { 
-                            value = m.Groups[2].Value;
-                        }
+                        value = string.Format("{0}{1}{0}", m.Groups[1].Value, m.Groups[2].Value);
                     }
-                    else
-                    {
+                }
+                else
+                {
+                    if (config.AllowCommentsAfterValue)
+
                         // remove in-line comments
                         foreach (var commentChar in commentsCharacters)
                         {
                             value = value.Split(commentChar)[0].Trim();
                         }
-                    }
                 }
 
-                if (config.TrimWrappingQuotes)
+                if (config.BoolTrimWrappingQuotes)
                 {
+
                     value = value.Trim(config.TrimQuotes);
-                } 
+                }
                 lastKey = key;
 
                 // validate key
@@ -732,7 +734,7 @@ namespace Sini
             {
                 return val.Replace(_config.NewLine, '\\' + _config.NewLine);
             };
-            
+
             // string builder to build the ini file
             StringBuilder sb = new StringBuilder();
 
@@ -749,7 +751,7 @@ namespace Sini
             {
                 sb.Append("\n");
             }
-            
+
             // handle sections
             foreach (var section in _sections)
             {
@@ -847,7 +849,7 @@ namespace Sini
             }
             else
             {
-                 sectionDict = _globalSection;
+                sectionDict = _globalSection;
             }
 
             // set value
@@ -1269,7 +1271,7 @@ namespace Sini
                     }
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -1313,6 +1315,6 @@ namespace Sini
             SnakecaseKeysAndSections = 1 << 3,
         }
 
-#endregion
+        #endregion
     }
 }

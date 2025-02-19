@@ -27,7 +27,7 @@ namespace Sini
            /// <summary>
         /// If true, remove wrappingquotes
         /// </summary>
-        public bool TrimWrappingQuotes;
+        public bool BoolTrimWrappingQuotes;
 
         public char[] TrimQuotes;
         public Regex TrimQuotesRegex;
@@ -91,9 +91,11 @@ namespace Sini
         {
             CommentCharacters = new char[] { '#', ';' };
             AllowCommentsAfterValue = true;
-            TrimWrappingQuotes = true;
+            BoolTrimWrappingQuotes = true;
             TrimQuotes = new char[] { '"', '\'' };
-            TrimQuotesRegex = new Regex(@"(['""])(.*?)(\1)", RegexOptions.Compiled);
+            TrimQuotesRegex = new Regex(@"(['""])((?:\\.|(?!\1).)*?)\1", RegexOptions.Compiled);
+            // Regex tested:  (['""])((?:\\.|(?!\1).)*?)\1
+            // Regex original: (['""])(.*?)(\1)
             AllowSections = true;
             Delimiter = '=';
             KeyValidationRegex = @"^[a-zA-Z_\-\.0-9]+$";
